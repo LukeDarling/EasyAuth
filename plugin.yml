@@ -1,0 +1,6 @@
+name: EasyAuth
+version: 3.0a
+author: LDX
+api: 1.12.0
+main: LDX\EasyAuth\Main
+load: POSTWORLD

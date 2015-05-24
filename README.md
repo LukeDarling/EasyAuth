@@ -1,2 +1,0 @@
-# EasyAuth
-A PocketMine plugin.
