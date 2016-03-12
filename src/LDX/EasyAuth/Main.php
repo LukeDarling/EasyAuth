@@ -131,7 +131,7 @@ class Main extends PluginBase implements Listener {
       $this->sendMessage($player,"§aYou have been authenticated.");
     } else {
       $this->setAuthed($player,false);
-      $this->sendMessage($player,"§cPlease login. /login <password>");print 3;
+      $this->sendMessage($player,"§cPlease login. /login <password>");
     }
   }
 
@@ -285,7 +285,7 @@ class Main extends PluginBase implements Listener {
         break;
       default:
         if(!$this->isAuthed($player)) {
-          $this->sendMessage($player,"§cPlease login. /login <password>");print 4;
+          $this->sendMessage($player,"§cPlease login. /login <password>");
           $event->setCancelled();
         }
     }
