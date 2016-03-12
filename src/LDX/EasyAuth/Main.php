@@ -5,18 +5,16 @@ namespace LDX\EasyAuth;
 use pocketmine\plugin\PluginBase;
 use pocketmine\event\Listener;
 use pocketmine\Player;
+use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerItemConsumeEvent;
-use pocketmine\event\player\PlayerItemHeldEvent;
 use pocketmine\event\player\PlayerCommandPreprocessEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
-use pocketmine\event\entity\EntityArmorChangeEvent;
-use pocketmine\event\entity\EntityInventoryChangeEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\EntityShootBowEvent;
 use pocketmine\event\block\BlockBreakEvent;
@@ -133,7 +131,7 @@ class Main extends PluginBase implements Listener {
       $this->sendMessage($player,"§aYou have been authenticated.");
     } else {
       $this->setAuthed($player,false);
-      $this->sendMessage($player,"§cPlease login. /login <password>");
+      $this->sendMessage($player,"§cPlease login. /login <password>");print 3;
     }
   }
 
@@ -182,6 +180,22 @@ class Main extends PluginBase implements Listener {
     return strtoupper(hash("whirlpool",hash("gost",strtoupper($username) . "EasyAuth" . $password) . hash("gost",$password . "LDX" . strtolower($username))));
   }
 
+  public function onPlayerPreLogin(PlayerPreLoginEvent $event) {
+    if($this->isRegistered($event->getPlayer())) {
+      if($this->getServer()->getPlayerExact($event->getPlayer()->getName()) instanceof Player) {
+        if($this->isAuthed($this->getServer()->getPlayerExact($event->getPlayer()->getName()))) {
+          $event->setCancelled();
+          $event->setKickMessage("§cThe player " . $event->getPlayer()->getName() . " is already connected.");
+        } else {
+          if(!$this->canAutoLogin($event->getPlayer())) {
+            $event->setCancelled();
+            $event->setKickMessage("§cThe player " . $event->getPlayer()->getName() . " is already connected.");
+          }
+        }
+      }
+    }
+  }
+
   public function onPlayerJoin(PlayerJoinEvent $event) {
     $this->join($event->getPlayer());
   }
@@ -210,30 +224,8 @@ class Main extends PluginBase implements Listener {
     }
   }
 
-  public function onPlayerItemHeld(PlayerItemHeldEvent $event) {
-    if(!$this->isAuthed($event->getPlayer())) {
-      $event->setCancelled();
-    }
-  }
-
   public function onPlayerQuit(PlayerQuitEvent $event) {
     $this->setAuthed($event->getPlayer(),false);
-  }
-
-  public function onEntityArmorChange(EntityArmorChangeEvent $event) {
-    if(($player = $event->getEntity()) instanceof Player) {
-      if(!$this->isAuthed($player)) {
-        $event->setCancelled();
-      }
-    }
-  }
-
-  public function onEntityInventoryChange(EntityInventoryChangeEvent $event) {
-    if(($player = $event->getEntity()) instanceof Player) {
-      if(!$this->isAuthed($player)) {
-        $event->setCancelled();
-      }
-    }
   }
 
   public function onEntityRegainHealth(EntityRegainHealthEvent $event) {
@@ -293,7 +285,7 @@ class Main extends PluginBase implements Listener {
         break;
       default:
         if(!$this->isAuthed($player)) {
-          $this->sendMessage($player,"§cPlease login. /login <password>");
+          $this->sendMessage($player,"§cPlease login. /login <password>");print 4;
           $event->setCancelled();
         }
     }
